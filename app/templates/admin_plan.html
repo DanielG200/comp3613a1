@@ -1,0 +1,47 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Review Course Plan{% endblock %}
+
+{% block subpage_content %}
+<div class="dashboard-shell advisor-shell">
+  <section class="hero-card">
+    <div>
+      <a class="text-decoration-none" href="{{ url_for('admin_home_view') }}#pending-approvals">&larr; Pending approvals</a>
+      <h1 class="mt-3">Course plan review</h1>
+      <p>Review the submitted courses and record your decision.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+      <div>
+        <h2>{{ plan.student.name }}</h2>
+        <p class="mb-1">{{ plan.student.program.name if plan.student.program else 'BSc Computer Science' }}</p>
+        <p class="text-muted mb-0">Semester: {{ plan.semester }}</p>
+      </div>
+      <span class="badge badge-{{ plan.status }}">{{ plan.status }}</span>
+    </div>
+
+    <h3 class="h5 mt-4">Courses</h3>
+    <ul class="list-group list-group-flush mb-3">
+      {% for item in plan.items %}
+      <li class="list-group-item px-0 d-flex justify-content-between gap-3">
+        <span>{{ item.course.code }} · {{ item.course.title }}</span>
+        <span class="text-nowrap">{{ item.course.credits }} credits</span>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="fw-semibold">Total credits: {{ plan.items|sum(attribute='course.credits') }}</p>
+
+    <form method="post" action="{{ url_for('review_course_plan', plan_id=plan.id) }}">
+      <div class="mb-3">
+        <label class="form-label" for="advisor-notes">Advisor notes</label>
+        <textarea id="advisor-notes" name="notes" class="form-control" rows="3" placeholder="Add an explanation, especially if rejecting this plan."></textarea>
+      </div>
+      <div class="approval-actions">
+        <button class="btn btn-primary" type="submit" name="decision" value="approved">Approve</button>
+        <button class="btn btn-outline-secondary" type="submit" name="decision" value="rejected">Reject</button>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Plan Semester Courses{% endblock %}
+
+{% block subpage_content %}
+<div class="dashboard-shell">
+  <section class="hero-card">
+    <div>
+      <h1>Plan Semester Courses</h1>
+      <p>Choose courses for an upcoming semester and submit your plan for advisor review.</p>
+    </div>
+  </section>
+
+  <div class="dashboard-grid">
+    <section class="panel">
+      <h2>Available courses</h2>
+      <form method="post" action="{{ url_for('create_course_plan') }}">
+        <div class="mb-3">
+          <label class="form-label" for="semester">Semester</label>
+          <input class="form-control" id="semester" name="semester" value="Fall 2025" required>
+        </div>
+        <div class="course-list">
+          {% for course in courses %}
+          <label class="course-option">
+            <input type="checkbox" name="course_ids" value="{{ course.id }}">
+            <span>
+              <strong>{{ course.code }}</strong> · {{ course.title }}
+              <small>({{ course.credits }} credits)</small>
+            </span>
+          </label>
+          {% else %}
+          <p class="text-muted">No courses are available for this program.</p>
+          {% endfor %}
+        </div>
+        <div class="mt-3 d-grid gap-2">
+          <button class="btn btn-primary" type="submit">Save course plan</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Existing plans</h2>
+      <div class="plan-list">
+        {% for plan in plans %}
+        <div class="plan-card">
+          <div class="d-flex justify-content-between align-items-center gap-3 mb-2">
+            <strong>{{ plan.semester }}</strong>
+            <span class="badge badge-{{ plan.status }}">{{ plan.status }}</span>
+          </div>
+          <small>{{ plan.items|length }} courses selected</small>
+          <ul class="mb-2 mt-2">
+            {% for item in plan.items %}
+            <li>{{ item.course.code }} · {{ item.course.title }}</li>
+            {% endfor %}
+          </ul>
+          {% if plan.status == 'rejected' %}
+          {% if plan.notes %}<p class="text-muted">Advisor feedback: {{ plan.notes }}</p>{% endif %}
+          {% set plan_course_ids = plan.items | map(attribute='course_id') | list %}
+          <form method="post" action="{{ url_for('revise_course_plan', plan_id=plan.id) }}">
+            <p class="form-label">Revise selected courses</p>
+            <div class="course-list">
+              {% for course in courses %}
+              <label class="course-option">
+                <input type="checkbox" name="course_ids" value="{{ course.id }}" {% if course.id in plan_course_ids %}checked{% endif %}>
+                <span><strong>{{ course.code }}</strong> · {{ course.title }} <small>({{ course.credits }} credits)</small></span>
+              </label>
+              {% endfor %}
+            </div>
+            <button class="btn btn-primary btn-sm mt-3" type="submit">Revise and resubmit</button>
+          </form>
+          {% endif %}
+          {% if plan.status == 'draft' %}
+          <form method="post" action="{{ url_for('submit_course_plan', plan_id=plan.id) }}">
+            <button class="btn btn-primary btn-sm" type="submit">Submit for approval</button>
+          </form>
+          {% endif %}
+        </div>
+        {% else %}
+        <div class="plan-card">
+          <p class="mb-0 text-muted">No plans yet. Build your first course plan for the next semester.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

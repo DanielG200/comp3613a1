@@ -1,9 +1,37 @@
 {% extends "authenticated-base.html" %}
-{% block title %}Admin{% endblock %}
+{% block title %}Advisor Dashboard{% endblock %}
 
 {% block subpage_content %}
-<div class="container-fluid py-2">
-  <h1 class="h4 mb-2">Admin</h1>
-  <p class="text-muted mb-0">Admin workflow screens replace this shell in Phase 5 implement.</p>
+<div class="dashboard-shell advisor-shell">
+  <section class="hero-card">
+    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+      <div>
+        <h1>Advisor dashboard</h1>
+        <p>Review the course plans students have submitted for their upcoming semesters.</p>
+      </div>
+      <span class="badge badge-submitted">{{ pending|length }} awaiting review</span>
+    </div>
+  </section>
+
+  <section class="panel" id="pending-approvals">
+    <h2>Pending approvals</h2>
+    <div class="approval-list">
+      {% for plan in pending %}
+      <div class="approval-card">
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-2">
+          <strong>{{ plan.student.name }}</strong>
+          <span class="badge badge-{{ plan.status }}">{{ plan.status }}</span>
+        </div>
+        <small>{{ plan.semester }} · {{ plan.student.program.name if plan.student.program else 'BSc Computer Science' }}</small>
+        <p class="mt-2 mb-3">{{ plan.items|length }} courses submitted</p>
+        <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('admin_plan_view', plan_id=plan.id) }}">Review plan</a>
+      </div>
+      {% else %}
+      <div class="approval-card">
+        <p class="mb-0 text-muted">No submitted semester plans are awaiting review.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
 </div>
 {% endblock %}

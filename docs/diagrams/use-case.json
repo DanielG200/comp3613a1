@@ -1,0 +1,12 @@
+{
+  "system": "MyAdvisor",
+  "actors": [
+    {"name": "Student", "side": "left"},
+    {"name": "Advisor/Administrator", "side": "right"}
+  ],
+  "use_cases": [
+    {"name": "Track Degree Progress", "actors": ["Student"]},
+    {"name": "Plan Semester Courses", "actors": ["Student"]},
+    {"name": "Approve Course Plan", "actors": ["Advisor/Administrator"]}
+  ]
+}

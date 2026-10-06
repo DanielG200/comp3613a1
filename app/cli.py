@@ -53,6 +53,7 @@ def cmd_seed(args: argparse.Namespace) -> None:
     admin / adminpass   (admin)
     """
     from app.database import ensure_db_and_tables, get_cli_session
+    from app.repositories.myadvisor import MyAdvisorRepository
     from app.repositories.user import UserRepository
     from app.schemas.user import AdminCreate, RegularUserCreate
     from app.utilities.security import encrypt_password
@@ -61,7 +62,7 @@ def cmd_seed(args: argparse.Namespace) -> None:
     ensure_db_and_tables()
 
     demo_users = [
-        ("bob", "bob@example.com", "bobpass", "regular_user"),
+        ("bob", "bob@example.com", "bobpass", "student"),
         ("admin", "admin@example.com", "adminpass", "admin"),
     ]
 
@@ -69,6 +70,7 @@ def cmd_seed(args: argparse.Namespace) -> None:
     skipped = 0
     with get_cli_session() as session:
         repo = UserRepository(session)
+        advisor_repo = MyAdvisorRepository(session)
         for username, email, password, role in demo_users:
             if repo.get_by_username(username):
                 print(f"  skip  {username} (already exists)")
@@ -85,6 +87,15 @@ def cmd_seed(args: argparse.Namespace) -> None:
             )
             print(f"  create {username} ({role})")
             created += 1
+
+        advisor_repo.seed_course_catalog()
+
+        if repo.get_by_username("bob"):
+            student_user = repo.get_by_username("bob")
+            advisor_repo.ensure_student_record(student_user)
+        if repo.get_by_username("admin"):
+            admin_user = repo.get_by_username("admin")
+            advisor_repo.ensure_advisor_record(admin_user)
 
     print(f"Seed done — created {created}, skipped {skipped}.")
     print("Login with bob/bobpass or admin/adminpass")
