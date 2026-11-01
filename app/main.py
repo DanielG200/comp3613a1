@@ -60,10 +60,11 @@ async def health():
 
 
 @app.exception_handler(status.HTTP_401_UNAUTHORIZED)
-async def unauthorized_redirect_handler(request: Request, exc: Exception):
+async def unauthorized_redirect_handler(request, exc):
     return templates.TemplateResponse(
         request=request,
         name="401.html",
+        status_code=401
     )
 
 

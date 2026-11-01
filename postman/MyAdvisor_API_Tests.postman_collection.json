@@ -1,0 +1,73 @@
+{
+  "info": {
+    "name": "MyAdvisor API Tests",
+    "description": "Postman tests for the MyAdvisor API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Returns HTTP 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Returns JSON response', function () {",
+              "    pm.response.to.be.json;",
+              "});",
+              "pm.test('API reports healthy status', function () {",
+              "    pm.expect(pm.response.json().ok).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get All Users",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/users"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Returns HTTP 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Returns a JSON array', function () {",
+              "    pm.expect(pm.response.json()).to.be.an('array');",
+              "});",
+              "pm.test('User records contain expected fields', function () {",
+              "    pm.response.json().forEach(function (user) {",
+              "        pm.expect(user).to.have.property('id');",
+              "        pm.expect(user).to.have.property('username');",
+              "        pm.expect(user).to.have.property('email');",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
